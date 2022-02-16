@@ -1,3 +1,6 @@
+require("ts-node").register({
+  files: true,
+});
 const fs = require("fs");
 const env = require("../../env");
 const { confirmOperation } = require("../../scripts/confirmation");
@@ -282,15 +285,10 @@ class YToken {
     closeFactorF,
     liqIncentiveF,
     priceFeedProxy,
-    maxMarkets,
+    maxMarkets
   ) {
     const operation = await this.contract.methods
-      .setGlobalFactors(
-        closeFactorF,
-        liqIncentiveF,
-        priceFeedProxy,
-        maxMarkets,
-      )
+      .setGlobalFactors(closeFactorF, liqIncentiveF, priceFeedProxy, maxMarkets)
       .send();
     await confirmOperation(this.tezos, operation.hash);
     return operation;

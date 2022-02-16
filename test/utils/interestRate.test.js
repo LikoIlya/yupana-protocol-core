@@ -5,13 +5,15 @@ const { strictEqual } = require("assert");
 const { InterestRate } = require("./interestRate");
 const { SendRate } = require("./sendRate");
 const { Utils } = require("./utils");
+const { VIEW_LAMBDA } = require("@taquito/taquito");
 
 const { confirmOperation } = require("../../scripts/confirmation");
 
-describe("Interest tests", async () => {
+describe("Interest tests", () => {
   let tezos;
   let interest;
   let sendRate;
+  let lambda;
 
   before("setup Interest", async () => {
     tezos = await Utils.initTezos();
@@ -33,10 +35,16 @@ describe("Interest tests", async () => {
     await sendRate.setInterestRate(interestContractAddress);
     await sendRate.updateStorage();
     strictEqual(sendRate.storage.interestAddress, interestContractAddress);
+    const op = await tezos.contract.originate({
+      code: VIEW_LAMBDA.code,
+      storage: VIEW_LAMBDA.storage,
+    });
+    await confirmOperation(tezos, op.hash);
+    lambda = op.contractAddress;
 
-    await interest.updateYToken(sendRateContractAddress);
-    await interest.updateStorage();
-    strictEqual(interest.storage.yToken, sendRateContractAddress);
+    // await interest.updateYToken(sendRateContractAddress);
+    // await interest.updateStorage();
+    // strictEqual(interest.storage.yToken, sendRateContractAddress);
   });
 
   it("set InterestRate admin", async () => {
@@ -59,15 +67,29 @@ describe("Interest tests", async () => {
 
   it("send UtilizationRate", async () => {
     tezos = await Utils.setProvider(tezos, bob.sk);
-    var borrows = 100;
-    var cash = 100000;
-    var reserves = 10;
+    const precision = "1000000";
+    var borrows = "100";
+    var cash = "100000";
+    var reserves = "10";
     var numerator = (cash + borrows - reserves) / borrows;
-    await sendRate.sendUtil(0, borrows, cash, reserves);
-    await sendRate.updateStorage();
+    const res = await interest.contract.views
+      .getUtilizationRate([
+        {
+          tokenId: "0",
+          borrowsF: borrows * precision,
+          cashF: cash * precision,
+          reservesF: reserves * precision,
+          precision: precision,
+          reserveFactorF: 1 * precision,
+        },
+      ])
+      .read(lambda.toString());
+    console.log(res)
+    // await sendRate.sendUtil(0, borrows, cash, reserves);
+    // await sendRate.updateStorage();
 
     strictEqual(
-      await sendRate.storage.utilRate.toString(),
+      res.amount.toString(),
       Math.floor(numerator).toString()
     );
   });

@@ -37,18 +37,15 @@ type interestParams     is [@layout:comb] record [
   borrows               : nat;
   cash                  : nat;
   reserves              : nat;
-  precision              : nat;
+  precision             : nat;
 ]
 
-type entryRateAction         is
+type entryRateAction   is
   | UpdateAdmin of address
-  | UpdateYToken of address
   | SetCoefficients of setCoeffParams
   | GetBorrowRate of rateParams
   | GetUtilizationRate of rateParams
   | GetSupplyRate of rateParams
-  | EnsuredSupplyRate of rateParams
-  | UpdReserveFactor of nat
 
 type entryAction is
   | SetInterestRate of address

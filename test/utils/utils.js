@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+require("ts-node").register({
+  files: true,
+});
 const { TezosToolkit } = require("@taquito/taquito");
 const { InMemorySigner } = require("@taquito/signer");
 const { alice } = require("../../scripts/sandbox/accounts");
