@@ -1,3 +1,6 @@
+require("ts-node").register({
+  files: true,
+});
 const fs = require("fs");
 const env = require("../../env");
 const { confirmOperation } = require("../../scripts/confirmation");
@@ -39,7 +42,7 @@ class FA12 {
       totalSupplyF: storage.totalSupplyF,
       ledger: storage.ledger,
       metadata: storage.metadata,
-      token_metadata: storage.token_metadata
+      token_metadata: storage.token_metadata,
     };
 
     for (const key in maps) {

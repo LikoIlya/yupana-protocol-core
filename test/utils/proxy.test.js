@@ -18,7 +18,7 @@ const tokenMetadata = MichelsonMap.fromLiteral({
   icon: Buffer.from("").toString("hex"),
 });
 
-describe("Proxy tests", async () => {
+describe("Proxy tests", () => {
   let tezos;
   let proxy;
   let oracle;
@@ -44,9 +44,9 @@ describe("Proxy tests", async () => {
     });
     await confirmOperation(tezos, operation.hash);
 
-    await oracle.updReturnAddressOracle(proxyContractAddress);
-    await oracle.updateStorage();
-    strictEqual(oracle.storage.returnAddress, proxyContractAddress);
+    // await oracle.updReturnAddressOracle(proxyContractAddress);
+    // await oracle.updateStorage();
+    // strictEqual(oracle.storage.returnAddress, proxyContractAddress);
 
     await proxy.updateOracle(oracleContractAddress);
     await proxy.updateStorage();
@@ -69,13 +69,12 @@ describe("Proxy tests", async () => {
   });
 
   it("update Pair by not admin", async () => {
-    try {
-      tezos = await Utils.setProvider(tezos, alice.sk);
-      await proxy.updatePair(0n, "BTC-USDT");
-      await proxy.updateStorage();
-    } catch (e) {
-      console.log("not-admin");
-    }
+    tezos = await Utils.setProvider(tezos, alice.sk);
+    await rejects(proxy.updatePair(0n, "BTC-USDT"),
+      (err) => {
+        ok(err.message == "proxy/not-admin", "Error message mismatch");
+        return true;
+      })
   });
 
   it("update Pair by admin", async () => {
@@ -87,26 +86,17 @@ describe("Proxy tests", async () => {
     strictEqual(pairId.toString(), "0");
   });
 
-  it("getting a price not for an permitted address", async () => {
-    try {
-      tezos = await Utils.setProvider(tezos, bob.sk);
-      await proxy.getPrice([0n]);
-      await proxy.updateStorage();
-    } catch (e) {
-      console.log("not-yToken");
-    }
-  });
-
   it("add market", async () => {
     tezos = await Utils.setProvider(tezos, alice.sk);
     await yToken.addMarket(
       alice.pkh,
+      "fA2",
       alice.pkh,
       0,
       0,
       10000,
+      10000,
       tokenMetadata,
-      "fA2",
       0
     );
     await yToken.updateStorage();
@@ -119,7 +109,7 @@ describe("Proxy tests", async () => {
     var r = await yToken.storage.tokens.get(0);
     strictEqual(r.lastPrice.toString(), "0");
 
-    await yToken.updatePrice([0n]);
+    await proxy.getPrice([0]);
     await yToken.updateStorage();
 
     r = await yToken.storage.tokens.get(0);

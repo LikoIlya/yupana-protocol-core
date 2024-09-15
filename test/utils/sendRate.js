@@ -1,3 +1,6 @@
+require("ts-node").register({
+  files: true,
+});
 const fs = require("fs");
 const env = require("../../env");
 const { confirmOperation } = require("../../scripts/confirmation");
@@ -72,25 +75,25 @@ class SendRate {
     return operation;
   }
 
-  async sendUtil(tokenId, borrows, cash, reserves) {
+  async sendUtil(tokenId, borrows, cash, reserves, precision = 1000000) {
     const operation = await this.contract.methods
-      .sendUtil(tokenId, borrows, cash, reserves)
+      .sendUtil(tokenId, borrows, cash, reserves, precision)
       .send();
     await confirmOperation(this.tezos, operation.hash);
     return operation;
   }
 
-  async sendBorrow(tokenId, borrows, cash, reserves) {
+  async sendBorrow(tokenId, borrows, cash, reserves, precision = 1000000) {
     const operation = await this.contract.methods
-      .sendBorrow(tokenId, borrows, cash, reserves)
+      .sendBorrow(tokenId, borrows, cash, reserves, precision)
       .send();
     await confirmOperation(this.tezos, operation.hash);
     return operation;
   }
 
-  async sendSupply(tokenId, borrows, cash, reserves) {
+  async sendSupply(tokenId, borrows, cash, reserves, precision = 1000000) {
     const operation = await this.contract.methods
-      .sendSupply(tokenId, borrows, cash, reserves)
+      .sendSupply(tokenId, borrows, cash, reserves, precision)
       .send();
     await confirmOperation(this.tezos, operation.hash);
     return operation;
